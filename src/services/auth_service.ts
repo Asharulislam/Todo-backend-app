@@ -1,10 +1,10 @@
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
-import * as userModel from '../models/user_models.js';
-import AppError from '../utils/app_error.js';
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import * as userModel from "../models/user_models.js";
+import AppError from "../utils/app_error.js";
 
 const signToken = (id: number): string =>
-  jwt.sign({ id }, process.env.JWT_SECRET as string, { expiresIn: '7d' });
+  jwt.sign({ id }, process.env.JWT_SECRET as string, { expiresIn: "7d" });
 
 interface RegisterInput {
   first_name: string;
@@ -18,9 +18,14 @@ interface LoginInput {
   password: string;
 }
 
-export const registerUser = async ({ first_name, last_name, email, password }: RegisterInput) => {
+export const registerUser = async ({
+  first_name,
+  last_name,
+  email,
+  password,
+}: RegisterInput) => {
   const existing = await userModel.findByEmail(email);
-  if (existing) throw new AppError('Email already registered', 409);
+  if (existing) throw new AppError("Email already registered", 409);
 
   const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -31,23 +36,23 @@ export const registerUser = async ({ first_name, last_name, email, password }: R
     password: hashedPassword,
   });
 
-  return { user, token: signToken(user.id) };
+  return { token: signToken(user.id), user };
 };
 
 export const loginUser = async ({ email, password }: LoginInput) => {
   const user = await userModel.findByEmail(email);
-  if (!user) throw new AppError('Invalid credentials', 401);
+  if (!user) throw new AppError("Invalid credentials", 401);
 
   const isMatch = await bcrypt.compare(password, user.password);
-  if (!isMatch) throw new AppError('Invalid credentials', 401);
+  if (!isMatch) throw new AppError("Invalid credentials", 401);
 
   return {
+    token: signToken(user.id),
     user: {
       id: user.id,
       first_name: user.first_name,
       last_name: user.last_name,
       email: user.email,
     },
-    token: signToken(user.id),
   };
 };
