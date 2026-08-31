@@ -1,21 +1,18 @@
-import express, { type Request, type Response } from 'express';
+import express from 'express';
 import dotenv from 'dotenv';
-import pool from './config/db.js';
+import routes from './routes/index.js';
+import { errorHandler } from './middleware/error.middleware.js';
 
 dotenv.config();
 
 const app = express();
 app.use(express.json());
 
-// Temporary test route
-app.get('/', async (_req: Request, res: Response) => {
-  try {
-    const result = await pool.query('SELECT NOW()');
-    res.json({ message: 'DB connected!', time: result.rows[0].now });
-  } catch (err) {
-    res.status(500).json({ error: (err as Error).message });
-  }
-});
+app.use('/api', routes);
 
-const PORT = process.env.PORT ?? 3000;
+app.get('/', (req, res) => res.send('Todo API is running'));
+
+app.use(errorHandler);
+
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
