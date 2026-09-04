@@ -8,7 +8,9 @@ const spec = swaggerJSDoc({
       version: '1.0.0',
       description: 'Auth + todos REST API',
     },
-    servers: [{ url: 'http://localhost:3000/api' }],
+    servers: [
+      { url: process.env.PUBLIC_URL ? `${process.env.PUBLIC_URL}/api` : 'http://localhost:3000/api' },
+    ],
     components: {
       securitySchemes: {
         bearerAuth: { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
